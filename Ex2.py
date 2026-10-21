@@ -1,10 +1,3 @@
-# ============================================================
-# EXERCISE 01
-# Visualization of Convolutional Filters and Feature Maps
-#
-# Model  : VGG16 Pre-trained on ImageNet
-# ============================================================
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -16,12 +9,7 @@ from tensorflow.keras.applications.vgg16 import (
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import Model
 
-
-# ============================================================
-# 1. LOAD IMAGE
-# ============================================================
-
-IMAGE_PATH = "your_image.jpg"       # <-- Change to your image path
+IMAGE_PATH = "your_image.jpg" 
 
 img = image.load_img(
     IMAGE_PATH,
@@ -36,11 +24,6 @@ input_image = np.expand_dims(img_array, axis=0)
 # VGG16 preprocessing
 input_image = preprocess_input(input_image)
 
-
-# ============================================================
-# 2. LOAD PRE-TRAINED VGG16
-# ============================================================
-
 model = VGG16(
     weights="imagenet",
     include_top=True
@@ -48,22 +31,12 @@ model = VGG16(
 
 model.summary()
 
-
-# ============================================================
-# 3. TOP-5 IMAGENET PREDICTIONS
-# ============================================================
-
 predictions = model.predict(input_image)
 
 top_5 = decode_predictions(
     predictions,
     top=5
 )[0]
-
-print("\n")
-print("=" * 60)
-print("TOP-5 IMAGENET PREDICTIONS")
-print("=" * 60)
 
 for i, (class_id, class_name, probability) in enumerate(
     top_5,
@@ -76,39 +49,17 @@ for i, (class_id, class_name, probability) in enumerate(
     )
 
 
-# ============================================================
-# 4. DISPLAY INPUT IMAGE
-# ============================================================
-
 plt.figure(figsize=(5, 5))
-
 plt.imshow(img)
 plt.title("Input Image")
 plt.axis("off")
-
 plt.show()
-
-
-# ============================================================
-# 5. SELECT CONVOLUTIONAL LAYERS
-# ============================================================
-#
-# Early       -> block1_conv2
-# Intermediate-> block3_conv3
-# Deep        -> block5_conv3
-#
-# ============================================================
 
 selected_layers = [
     "block1_conv2",
     "block3_conv3",
     "block5_conv3"
 ]
-
-
-# ============================================================
-# 6. EXTRACT FEATURE MAPS
-# ============================================================
 
 layer_outputs = [
     model.get_layer(layer_name).output
@@ -122,18 +73,11 @@ feature_model = Model(
 
 feature_maps = feature_model.predict(input_image)
 
-
-# ============================================================
-# 7. VISUALIZE FEATURE MAPS
-# ============================================================
-
 for layer_name, feature_map in zip(
     selected_layers,
     feature_maps
 ):
 
-    print("\n")
-    print("=" * 60)
     print("Layer:", layer_name)
     print("Feature Map Shape:", feature_map.shape)
 
@@ -154,10 +98,6 @@ for layer_name, feature_map in zip(
         "Number of Channels:",
         channels
     )
-
-    # --------------------------------------------------------
-    # Display first 16 feature maps
-    # --------------------------------------------------------
 
     n_features = min(16, channels)
 
@@ -206,11 +146,6 @@ for layer_name, feature_map in zip(
     plt.tight_layout()
     plt.show()
 
-
-# ============================================================
-# 8. VISUALIZE LEARNED CONVOLUTIONAL FILTERS
-# ============================================================
-
 filter_layers = [
     "block1_conv1",
     "block3_conv1",
@@ -221,24 +156,9 @@ filter_layers = [
 for layer_name in filter_layers:
 
     layer = model.get_layer(layer_name)
-
-    # Get learned weights and biases
     filters, biases = layer.get_weights()
-
-    print("\n")
-    print("=" * 60)
     print("Filter Layer:", layer_name)
     print("Filter Shape:", filters.shape)
-
-    # --------------------------------------------------------
-    # Filter shape:
-    #
-    # (filter_height,
-    #  filter_width,
-    #  input_channels,
-    #  output_channels)
-    # --------------------------------------------------------
-
     n_filters = min(
         16,
         filters.shape[-1]
@@ -256,18 +176,13 @@ for layer_name in filter_layers:
     )
 
     for i in range(n_filters):
-
-        # Extract one filter
         filter_img = filters[:, :, :, i]
-
-        # Normalize
         filter_img = (
             filter_img -
             filter_img.min()
         )
 
         if filter_img.max() != 0:
-
             filter_img = (
                 filter_img /
                 filter_img.max()
@@ -278,23 +193,11 @@ for layer_name in filter_layers:
             cols,
             i + 1
         )
-
-        # ----------------------------------------------------
-        # First convolutional layer:
-        # Input has 3 RGB channels
-        # ----------------------------------------------------
-
         if filter_img.shape[-1] == 3:
 
             plt.imshow(
                 filter_img
             )
-
-        # ----------------------------------------------------
-        # Deeper convolutional layers:
-        # Input has many feature channels.
-        # Take mean across channels for visualization.
-        # ----------------------------------------------------
 
         else:
 
@@ -321,11 +224,6 @@ for layer_name in filter_layers:
     plt.tight_layout()
     plt.show()
 
-
-# ============================================================
-# 9. PRINT FEATURE-MAP DIMENSIONS
-# ============================================================
-
 print("\n\n")
 print("=" * 60)
 print("FEATURE MAP DIMENSIONS")
@@ -343,16 +241,6 @@ for layer_name, feature_map in zip(
         f"{feature_map.shape[3]}"
     )
 
-
-# ============================================================
-# 10. DEPTH-WISE COMPARISON
-# ============================================================
-
-print("\n\n")
-print("=" * 60)
-print("DEPTH-WISE COMPARISON")
-print("=" * 60)
-
 for layer_name, feature_map in zip(
     selected_layers,
     feature_maps
@@ -369,11 +257,6 @@ for layer_name, feature_map in zip(
         f"Channels: {channels}"
     )
 
-
-# ============================================================
-# 11. COMBINED DEPTH-WISE FEATURE MAP VISUALIZATION
-# ============================================================
-
 fig, axes = plt.subplots(
     3,
     1,
@@ -385,25 +268,17 @@ for ax, layer_name, feature_map in zip(
     selected_layers,
     feature_maps
 ):
-
-    # --------------------------------------------------------
-    # Average all channels to create one representative
-    # activation map for this layer
-    # --------------------------------------------------------
-
     activation = np.mean(
         feature_map[0],
         axis=-1
     )
 
-    # Normalize
     activation = (
         activation -
         activation.min()
     )
 
     if activation.max() != 0:
-
         activation = (
             activation /
             activation.max()
@@ -434,23 +309,9 @@ plt.tight_layout()
 plt.show()
 
 
-# ============================================================
-# 12. FINAL SUMMARY
-# ============================================================
-
-print("\n\n")
-print("=" * 60)
-print("EXERCISE 01 SUMMARY")
-print("=" * 60)
-
-print("\nSelected Layers:")
-print("----------------")
-
 for layer_name in selected_layers:
     print(layer_name)
 
-print("\nFeature Map Dimensions:")
-print("-----------------------")
 
 for layer_name, feature_map in zip(
     selected_layers,
