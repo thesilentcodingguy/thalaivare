@@ -1,12 +1,3 @@
-# ============================================================
-# TRANSFER LEARNING USING VGG16
-# ImageNet Feature Extraction and Classification
-# ============================================================
-
-# ------------------------------------------------------------
-# 1. IMPORT LIBRARIES
-# ------------------------------------------------------------
-
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,13 +18,7 @@ from sklearn.metrics import (
     ConfusionMatrixDisplay
 )
 
-
-# ------------------------------------------------------------
-# 2. LOAD DATASET
-# ------------------------------------------------------------
-
 path = "dataset"
-
 classes = [
     "airliner",
     "sports_car",
@@ -44,33 +29,21 @@ X = []
 y = []
 
 for i, class_name in enumerate(classes):
-
     folder = os.path.join(path, class_name)
-
     for file in os.listdir(folder):
-
         file_path = os.path.join(folder, file)
-
         img = image.load_img(
             file_path,
             target_size=(224, 224)
         )
-
         img = image.img_to_array(img)
-
         X.append(img)
         y.append(i)
 
 X = np.array(X)
 y = np.array(y)
-
 print("Images:", X.shape)
 print("Labels:", y.shape)
-
-
-# ------------------------------------------------------------
-# 3. LOAD PRE-TRAINED VGG16
-# ------------------------------------------------------------
 
 vgg = VGG16(
     weights="imagenet",
@@ -78,45 +51,20 @@ vgg = VGG16(
     input_shape=(224, 224, 3)
 )
 
-# Freeze VGG16
 vgg.trainable = False
-
-
-# ------------------------------------------------------------
-# 4. FEATURE EXTRACTION
-# ------------------------------------------------------------
-
-# Remove original classifier
-# Apply Global Average Pooling
-
 extractor = Model(
     inputs=vgg.input,
     outputs=GlobalAveragePooling2D()(vgg.output)
 )
 
-# VGG16 preprocessing
 X = preprocess_input(X)
-
-# Extract features
 features = extractor.predict(X)
 
 print("Feature Vector Shape:", features.shape)
 print("Feature Vector Dimension:", features.shape[1])
-
-
-# ------------------------------------------------------------
-# 5. SAVE FEATURES
-# ------------------------------------------------------------
-
 np.save("features.npy", features)
 np.save("labels.npy", y)
-
 print("Features saved successfully.")
-
-
-# ------------------------------------------------------------
-# 6. TRAIN-TEST SPLIT
-# ------------------------------------------------------------
 
 X_train, X_test, y_train, y_test = train_test_split(
     features,
@@ -128,11 +76,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 print("Training samples:", len(X_train))
 print("Testing samples :", len(X_test))
-
-
-# ------------------------------------------------------------
-# 7. CREATE NEW CLASSIFICATION LAYER
-# ------------------------------------------------------------
 
 model = Sequential([
     Dense(
@@ -149,12 +92,6 @@ model.compile(
 )
 
 model.summary()
-
-
-# ------------------------------------------------------------
-# 8. TRAIN CLASSIFIER
-# ------------------------------------------------------------
-
 model.fit(
     X_train,
     y_train,
@@ -163,23 +100,11 @@ model.fit(
     verbose=1
 )
 
-
-# ------------------------------------------------------------
-# 9. TEST ON UNSEEN IMAGES
-# ------------------------------------------------------------
-
 probabilities = model.predict(X_test)
-
-# Select class with highest probability
 predictions = np.argmax(
     probabilities,
     axis=1
 )
-
-
-# ------------------------------------------------------------
-# 10. CALCULATE PERFORMANCE
-# ------------------------------------------------------------
 
 accuracy = accuracy_score(
     y_test,
@@ -204,19 +129,11 @@ f1 = f1_score(
     average="weighted"
 )
 
-
-print("\n================ RESULTS ================")
-
 print("Feature Vector Dimension:", features.shape[1])
 print("Accuracy :", accuracy)
 print("Precision:", precision)
 print("Recall   :", recall)
 print("F1 Score :", f1)
-
-
-# ------------------------------------------------------------
-# 11. CONFUSION MATRIX
-# ------------------------------------------------------------
 
 cm = confusion_matrix(
     y_test,
@@ -226,8 +143,6 @@ cm = confusion_matrix(
 print("\nConfusion Matrix:")
 print(cm)
 
-
-# Display confusion matrix
 display = ConfusionMatrixDisplay(
     confusion_matrix=cm,
     display_labels=classes
