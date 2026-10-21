@@ -1,19 +1,3 @@
-# ============================================================
-# DEEP LEARNING CONCEPTS AND ARCHITECTURES
-# EXERCISE 01
-#
-# ImageNet Preprocessing and Visualization
-# using a Pre-trained CNN (VGG16)
-#
-# Dataset       : Custom labeled image dataset
-# Pretrained CNN: VGG16 trained on ImageNet
-# ============================================================
-
-
-# ============================================================
-# 1. IMPORT LIBRARIES
-# ============================================================
-
 import os
 import random
 import numpy as np
@@ -27,10 +11,6 @@ from tensorflow.keras.applications.vgg16 import (
 )
 from tensorflow.keras.utils import load_img, img_to_array
 
-
-# ============================================================
-# 2. DATASET PATH AND CLASSES
-# ============================================================
 
 data_path = "/content/drive/MyDrive/images"
 
@@ -50,11 +30,6 @@ classes = [
 print("Number of classes:", len(classes))
 print("Classes:", classes)
 
-
-# ============================================================
-# 3. LOAD PRE-TRAINED VGG16
-# ============================================================
-
 vgg = VGG16(
     weights="imagenet",
     include_top=True
@@ -63,10 +38,6 @@ vgg = VGG16(
 print("\nVGG16 Input Shape :", vgg.input_shape)
 print("VGG16 Output Shape:", vgg.output_shape)
 
-
-# ============================================================
-# 4. SELECT A RANDOM IMAGE
-# ============================================================
 
 selected_class = random.choice(classes)
 
@@ -87,11 +58,6 @@ image_path = os.path.join(
 print("\nOriginal Class:", selected_class)
 print("Image:", image_name)
 
-
-# ============================================================
-# 5. LOAD AND RESIZE IMAGE
-# ============================================================
-
 img = load_img(
     image_path,
     target_size=(224, 224)
@@ -99,10 +65,6 @@ img = load_img(
 
 print("Image size:", img.size)
 
-
-# ============================================================
-# 6. DISPLAY ORIGINAL IMAGE
-# ============================================================
 
 plt.figure(figsize=(5, 5))
 
@@ -113,45 +75,23 @@ plt.axis("off")
 plt.show()
 
 
-# ============================================================
-# 7. CONVERT IMAGE TO NUMPY ARRAY
-# ============================================================
 
 x = img_to_array(img)
 
 print("Image array shape:", x.shape)
 
 
-# ============================================================
-# 8. ADD BATCH DIMENSION
-# ============================================================
-
 x = np.expand_dims(x, axis=0)
 
 print("Input shape after batch dimension:", x.shape)
-
-
-# ============================================================
-# 9. VGG16 PREPROCESSING
-# ============================================================
 
 x = preprocess_input(x)
 
 print("Preprocessing completed.")
 
-
-# ============================================================
-# 10. PASS IMAGE THROUGH VGG16
-# ============================================================
-
 predictions = vgg.predict(x)
 
 print("\nPrediction shape:", predictions.shape)
-
-
-# ============================================================
-# 11. GET TOP-5 IMAGENET PREDICTIONS
-# ============================================================
 
 top5 = decode_predictions(
     predictions,
@@ -167,17 +107,10 @@ for rank, (_, name, probability) in enumerate(top5, start=1):
         f"{rank}. {name:25s} : {probability:.2%}"
     )
 
-
-# ============================================================
-# 12. DISPLAY IMAGE WITH TOP-5 PREDICTIONS
-# ============================================================
-
 plt.figure(figsize=(7, 5))
-
 plt.imshow(img)
 plt.title(f"Original Class: {selected_class}")
 plt.axis("off")
-
 plt.show()
 
 print("Top-5 ImageNet Predictions:\n")
@@ -188,10 +121,6 @@ for rank, (_, name, probability) in enumerate(top5, start=1):
         f"{rank}. {name:25s} : {probability:.2%}"
     )
 
-
-# ============================================================
-# 13. DISPLAY VGG16 LAYERS
-# ============================================================
 
 print("\nVGG16 Layers:")
 print("--------------------------------")
@@ -204,11 +133,6 @@ for i, layer in enumerate(vgg.layers):
         layer.output.shape
     )
 
-
-# ============================================================
-# 14. SELECT INTERMEDIATE CONVOLUTIONAL LAYERS
-# ============================================================
-
 layers_to_extract = [
     "block1_conv2",
     "block3_conv3",
@@ -217,11 +141,6 @@ layers_to_extract = [
 
 print("\nSelected Layers:")
 print(layers_to_extract)
-
-
-# ============================================================
-# 15. CREATE FEATURE EXTRACTION MODELS
-# ============================================================
 
 feature_models = {}
 
@@ -232,11 +151,6 @@ for layer_name in layers_to_extract:
         outputs=vgg.get_layer(layer_name).output
     )
 
-
-# ============================================================
-# 16. EXTRACT INTERMEDIATE FEATURE MAPS
-# ============================================================
-
 features = {}
 
 for layer_name, feature_model in feature_models.items():
@@ -246,11 +160,6 @@ for layer_name, feature_model in feature_models.items():
     print(
         f"{layer_name}: {features[layer_name].shape}"
     )
-
-
-# ============================================================
-# 17. DISPLAY FEATURE MAPS
-# ============================================================
 
 for layer_name, feature in features.items():
 
@@ -274,10 +183,6 @@ for layer_name, feature in features.items():
     plt.show()
 
 
-# ============================================================
-# 18. DISPLAY FEATURE MAP DIMENSIONS
-# ============================================================
-
 print("\nIntermediate Feature Map Dimensions:")
 print("------------------------------------------")
 
@@ -286,11 +191,6 @@ for layer_name, feature in features.items():
     print(
         f"{layer_name:15s} -> {feature.shape}"
     )
-
-
-# ============================================================
-# 19. VISUALIZE LEARNED FILTERS
-# ============================================================
 
 filter_layer = vgg.get_layer(
     "block1_conv1"
@@ -301,18 +201,11 @@ filters, biases = filter_layer.get_weights()
 print("\nFirst Convolutional Layer Filters:")
 print("Filter shape:", filters.shape)
 
-
-# ============================================================
-# 20. DISPLAY FIRST 16 LEARNED FILTERS
-# ============================================================
-
 plt.figure(figsize=(10, 6))
 
 for i in range(16):
 
     f = filters[:, :, :, i]
-
-    # Normalize filter values for visualization
     f = (
         f - f.min()
     ) / (
@@ -330,15 +223,6 @@ plt.suptitle(
 )
 
 plt.show()
-
-
-# ============================================================
-# 21. FINAL SUMMARY
-# ============================================================
-
-print("\n==========================================")
-print("EXERCISE 01 SUMMARY")
-print("==========================================")
 
 print("Input image          :", (224, 224, 3))
 print("Batch input          :", x.shape)
